@@ -22,12 +22,14 @@ class AgentWithMCP:
         if model_provider == "openai":
             self._model = init_chat_model(
                 "gpt-4o-mini",
-                model_provider="openai"
+                model_provider="openai",
+                streamable=True,
             )
         elif model_provider == "google_genai":
             self._model = init_chat_model(
                 "gemini-2.0-flash",
-                model_provider="google_genai"
+                model_provider="google_genai",
+                streamable=True,
             )
         else:
             raise ValueError(f"Unsupported model provider: {model_provider}")
@@ -83,12 +85,13 @@ class AgentWithMCP:
             "messages": [HumanMessage(content=message)],
         }
 
-        weather_res = await self._agent.ainvoke(
+        async for weather_res in self._agent.astream(
             structured_message,
             self._config,
-        )
-        result = weather_res["messages"][-1].content
-        print(result)
+            stream_mode="values",
+        ):
+            weather_res["messages"][-1].pretty_print()
+            result += weather_res["messages"][-1].content
 
         return result
 
