@@ -12,13 +12,13 @@ class BasicAgent:
         self._client = None
         self._agent = None
         self._mcp_config = {}
+        self._tools = []
 
         # Set model based on provider
         if model_provider == "openai":
             self._model = init_chat_model(
                 "gpt-4o-mini",
                 model_provider="openai",
-                model_kwargs={"streamable": True},
             )
         elif model_provider == "google_genai":
             self._model = init_chat_model(
@@ -49,6 +49,9 @@ class BasicAgent:
             "transport": "streamable_http"
         }
 
+    def register_normal_tool(self, tools: List[any]):
+        self._tools.extend(tools)
+
     async def session(self):
         if self._mcp_config == {}:
             raise ValueError("No MCP servers registered")
@@ -63,9 +66,10 @@ class BasicAgent:
 
         self._client = MultiServerMCPClient(self._mcp_config)
         tools = await self._client.get_tools()
+        self.register_normal_tool(tools)
         self._agent = create_react_agent(
             self._model,
-            tools=tools,
+            tools=self._tools,
             checkpointer=self._memory,
         )
 
