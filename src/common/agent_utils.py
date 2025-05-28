@@ -10,27 +10,12 @@ from contextlib import asynccontextmanager, AsyncExitStack
 
 
 class BasicAgent:
-    def __init__(self, model_provider="openai"):
+    def __init__(self, model_provider: str, model_name: str = ""):
         self._client = None
         self._agent = None
         self._mcp_config = {}
         self._tools = []
-
-        # Set model based on provider
-        if model_provider == "openai":
-            self._model = init_chat_model(
-                "gpt-4o-mini",
-                model_provider="openai",
-            )
-        elif model_provider == "google_genai":
-            self._model = init_chat_model(
-                "gemini-2.0-flash",
-                model_provider="google_genai",
-                model_kwargs={"streamable": True},
-            )
-        else:
-            raise ValueError(f"Unsupported model provider: {model_provider}")
-
+        self._model = self._select_model(model_provider, model_name)
         self._memory = MemorySaver()
 
         thread_id = str(uuid.uuid4())
@@ -94,3 +79,27 @@ class BasicAgent:
             result += weather_res["messages"][-1].content
 
         return result
+
+    @staticmethod
+    def _select_model(model_provider: str, model_name: str = ""):
+        selected_model = None
+        if model_name:
+            selected_model = init_chat_model(
+                model_name,
+                model_provider=model_provider,
+            )
+        elif model_provider == "openai":
+            selected_model = init_chat_model(
+                "gpt-4o-mini",
+                model_provider="openai",
+            )
+        elif model_provider == "google_genai":
+            selected_model = init_chat_model(
+                "gemini-2.0-flash",
+                model_provider="google_genai",
+                model_kwargs={"streamable": True},
+            )
+        else:
+            raise ValueError(f"Unsupported model provider: {model_provider}")
+
+        return selected_model
