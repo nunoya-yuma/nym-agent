@@ -2,9 +2,11 @@ from langchain.chat_models import init_chat_model
 from langchain_core.messages import HumanMessage
 from langgraph.checkpoint.memory import MemorySaver
 from langchain_mcp_adapters.client import MultiServerMCPClient
+from langchain_mcp_adapters.tools import load_mcp_tools
 from langgraph.prebuilt import create_react_agent
 import uuid
 from typing import List
+from contextlib import asynccontextmanager, AsyncExitStack
 
 
 class BasicAgent:
@@ -52,6 +54,7 @@ class BasicAgent:
     def register_normal_tool(self, tools: List[any]):
         self._tools.extend(tools)
 
+    @asynccontextmanager
     async def session(self):
         if self._mcp_config == {}:
             raise ValueError("No MCP servers registered")
@@ -65,13 +68,21 @@ class BasicAgent:
             raise ValueError("No memory specified")
 
         self._client = MultiServerMCPClient(self._mcp_config)
-        tools = await self._client.get_tools()
-        self.register_normal_tool(tools)
-        self._agent = create_react_agent(
-            self._model,
-            tools=self._tools,
-            checkpointer=self._memory,
-        )
+        async with AsyncExitStack() as stack:
+            for server_name in self._mcp_config.keys():
+                session = await stack.enter_async_context(
+                    self._client.session(server_name)
+                )
+                tools = await load_mcp_tools(session)
+                self.register_normal_tool(tools)
+
+            self._agent = create_react_agent(
+                self._model,
+                tools=self._tools,
+                checkpointer=self._memory,
+            )
+
+            yield
 
     async def send_query(self, message: str) -> str:
         if self._agent is None:
