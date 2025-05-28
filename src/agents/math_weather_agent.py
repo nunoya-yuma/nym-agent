@@ -46,7 +46,7 @@ async def main():
 
     search = TavilySearchResults(max_results=2)
     tools = [search]
-    agent.register_normal_tool(tools)
+    agent.register_tools(tools)
 
     async with agent.session():
         _ = await agent.send_query("what's (3 + 5) x 12")

@@ -41,7 +41,7 @@ class BasicAgent:
     def set_mcp_config(self, mcp_config: dict):
         self._mcp_config = mcp_config
 
-    def register_normal_tool(self, tools: List[any]):
+    def register_tools(self, tools: List[any]):
         self._tools.extend(tools)
 
     @asynccontextmanager
@@ -64,7 +64,7 @@ class BasicAgent:
                     self._client.session(server_name)
                 )
                 tools = await load_mcp_tools(session)
-                self.register_normal_tool(tools)
+                self.register_tools(tools)
 
             self._agent = create_react_agent(
                 self._model,
