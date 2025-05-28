@@ -3,13 +3,26 @@ import dotenv
 import os
 from pathlib import Path
 import argparse
+import logging
 
 from langchain_community.tools.tavily_search import TavilySearchResults
 
 from src.common import agent_utils
 
 
+logger = logging.getLogger("src")
+
+
 async def main():
+    logger.setLevel(logging.DEBUG)
+    handler = logging.StreamHandler()
+    formatter = logging.Formatter(
+        "%(asctime)s[%(levelname)s] %(message)s"
+    )
+    handler.setFormatter(formatter)
+    logger.addHandler(handler)
+
+    logger.info("Starting Math and Weather Agent...")
     dotenv.load_dotenv()
 
     # Parse command-line arguments
@@ -48,6 +61,7 @@ async def main():
         tools=tools,
     )
     async with agent.session():
+        logger.info("Agent session started.")
         _ = await agent.send_query("what's (3 + 5) x 12")
         _ = await agent.send_query(
             "I live in Osaka. Do you know where that is?"

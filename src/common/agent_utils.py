@@ -7,6 +7,10 @@ from langgraph.prebuilt import create_react_agent
 import uuid
 from typing import List
 from contextlib import asynccontextmanager, AsyncExitStack
+from logging import getLogger
+
+
+logger = getLogger(__name__)
 
 
 class BasicAgent:
@@ -26,8 +30,8 @@ class BasicAgent:
 
         thread_id = str(uuid.uuid4())
         self._config = {"configurable": {"thread_id": thread_id}}
-        print(f"Thread ID: {thread_id}")
-        print(f"Using model provider: {model_provider}")
+        logger.info(f"Thread ID: {thread_id}")
+        logger.info(f"Using model provider: {model_provider}")
 
     @asynccontextmanager
     async def session(self):
@@ -49,6 +53,7 @@ class BasicAgent:
                 tools = await load_mcp_tools(session)
                 self._tools.extend(tools)
 
+            logger.info(f"Loaded tools: {[tool.name for tool in self._tools]}")
             self._agent = create_react_agent(
                 self._model,
                 tools=self._tools,
