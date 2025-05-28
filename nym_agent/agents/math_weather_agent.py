@@ -7,10 +7,10 @@ import logging
 
 from langchain_community.tools.tavily_search import TavilySearchResults
 
-from src.common import agent_utils
+from nym_agent.common import agent_utils
 
 
-logger = logging.getLogger("src")
+logger = logging.getLogger("nym_agent")
 
 
 async def main():

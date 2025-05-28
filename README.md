@@ -15,9 +15,9 @@ source .venv/bin/activate
 ## Math and weather agent
 
 ```shell
-python src/mcp_servers/weather/weather_streamable_http.py
+python snym_agentrc/mcp_servers/weather/weather_streamable_http.py
 ```
 
 ```shell
-python -m src.agents.math_weather_agent
+python -m nym_agent.agents.math_weather_agent
 ```
