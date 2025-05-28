@@ -31,12 +31,10 @@ class BasicAgent:
 
     @asynccontextmanager
     async def session(self):
-        if self._mcp_config == {}:
-            raise ValueError("No MCP servers registered")
         if self._client is not None:
             raise ValueError("MCP client already created")
         if self._agent is not None:
-            raise ValueError("MCP agent already created")
+            raise ValueError("Agent is already created")
         if self._model is None:
             raise ValueError("No model specified")
         if self._memory is None:
@@ -56,7 +54,6 @@ class BasicAgent:
                 tools=self._tools,
                 checkpointer=self._memory,
             )
-
             yield
 
     async def send_query(self, message: str) -> str:
