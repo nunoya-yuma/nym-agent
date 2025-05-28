@@ -10,24 +10,24 @@ from contextlib import asynccontextmanager, AsyncExitStack
 
 
 class BasicAgent:
-    def __init__(self, model_provider: str, model_name: str = ""):
+    def __init__(
+            self,
+            model_provider: str,
+            model_name: str = "",
+            mcp_config: dict = None,
+            tools: List[any] = None
+    ):
         self._client = None
         self._agent = None
-        self._mcp_config = {}
-        self._tools = []
+        self._tools = tools
         self._model = self._select_model(model_provider, model_name)
+        self._mcp_config = mcp_config
         self._memory = MemorySaver()
 
         thread_id = str(uuid.uuid4())
         self._config = {"configurable": {"thread_id": thread_id}}
         print(f"Thread ID: {thread_id}")
         print(f"Using model provider: {model_provider}")
-
-    def set_mcp_config(self, mcp_config: dict):
-        self._mcp_config = mcp_config
-
-    def register_tools(self, tools: List[any]):
-        self._tools.extend(tools)
 
     @asynccontextmanager
     async def session(self):
@@ -49,7 +49,7 @@ class BasicAgent:
                     self._client.session(server_name)
                 )
                 tools = await load_mcp_tools(session)
-                self.register_tools(tools)
+                self._tools.extend(tools)
 
             self._agent = create_react_agent(
                 self._model,

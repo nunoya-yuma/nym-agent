@@ -24,10 +24,6 @@ async def main():
     )
     args = parser.parse_args()
 
-    agent = agent_utils.BasicAgent(
-        model_provider=args.provider
-    )
-
     current_dir = Path(os.path.dirname(os.path.abspath(__file__)))
     math_server_path = \
         str(current_dir.parent / "mcp_servers" / "math" / "math_stdio.py")
@@ -42,12 +38,15 @@ async def main():
             "transport": "streamable_http",
         }
     }
-    agent.set_mcp_config(mcp_config)
 
     search = TavilySearchResults(max_results=2)
     tools = [search]
-    agent.register_tools(tools)
 
+    agent = agent_utils.BasicAgent(
+        model_provider=args.provider,
+        mcp_config=mcp_config,
+        tools=tools,
+    )
     async with agent.session():
         _ = await agent.send_query("what's (3 + 5) x 12")
         _ = await agent.send_query(
