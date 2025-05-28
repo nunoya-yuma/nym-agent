@@ -31,8 +31,18 @@ async def main():
     current_dir = Path(os.path.dirname(os.path.abspath(__file__)))
     math_server_path = \
         str(current_dir.parent / "mcp_servers" / "math" / "math_stdio.py")
-    agent.register_mcp_stdio("math", ["uv", "run", math_server_path])
-    agent.register_mcp_streamable_http("weather", "http://localhost:8000/mcp")
+    mcp_config = {
+        "math": {
+            "command": "python",
+            "args": [math_server_path],
+            "transport": "stdio",
+        },
+        "weather": {
+            "url": "http://localhost:8000/mcp",
+            "transport": "streamable_http",
+        }
+    }
+    agent.set_mcp_config(mcp_config)
 
     search = TavilySearchResults(max_results=2)
     tools = [search]

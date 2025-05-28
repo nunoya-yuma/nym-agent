@@ -38,18 +38,8 @@ class BasicAgent:
         print(f"Thread ID: {thread_id}")
         print(f"Using model provider: {model_provider}")
 
-    def register_mcp_stdio(self, name: str, command: List[str]) -> None:
-        self._mcp_config[name] = {
-            "command": command[0],
-            "args": command[1:],
-            "transport": "stdio"
-        }
-
-    def register_mcp_streamable_http(self, name: str, url: str) -> None:
-        self._mcp_config[name] = {
-            "url": url,
-            "transport": "streamable_http"
-        }
+    def set_mcp_config(self, mcp_config: dict):
+        self._mcp_config = mcp_config
 
     def register_normal_tool(self, tools: List[any]):
         self._tools.extend(tools)
